@@ -1,0 +1,385 @@
+openapi: 3.0.0
+info:
+  version: "1.0.0"
+  title: iSi Technology
+  description: API documentation for the iSi Technology Test Task
+tags:
+  - name: Thread
+    description: API requests with Thread
+  - name: Message
+    description: API requests with Message
+  - name: User
+    description: API requests with users
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: http://127.0.0.1:8000/
+
+paths:
+  /api/v1/chat/thread/:
+    post:
+      tags:
+        - Thread
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+      summary: Method create Thread with 2 users or retriev if Thread already exist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - participants
+              properties:
+                participants:
+                  type: array
+              example:
+                participants: [1, 2]
+      responses:
+        '200':
+          description: If Thread already exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '201':
+          description: If object created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/NotAuthorised'
+  /api/v1/chat/thread/{pk}/:
+    delete:
+        tags:
+        - Thread
+        parameters:
+          - $ref: "#/components/parameters/Authorization"
+          - in: path
+            name: pk
+            description: Thread id
+            required: True
+            schema:
+              type: integer
+        summary: Method delete Thread if Thread already exist
+        responses:
+          '204':
+            description: Thread was delete
+          '400':
+            description: Bad request
+          '401':
+            $ref: '#/components/responses/NotAuthorised'
+          '404':
+            description: Thread not found
+  /api/v1/chat/thread/all/owner/{pk}:
+    get:
+      tags:
+        - Thread
+      summary: List threads for user
+      description:
+        List all threads that the specified user is participating in.
+      parameters:
+        - in: path
+          name: pk
+          description: User ID
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: page
+          description: Page number (1-based)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: page_size
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: List of threads
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type: string
+                  previous:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Thread'
+        '400':
+            description: Bad request
+        '401':
+            $ref: '#/components/responses/NotAuthorised'
+        '404':
+            description: User not found
+  /api/v1/chat/thread/{pk}/messages:
+    post:
+      tags:
+        - Message
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - in: path
+          name: pk
+          description: Thread ID
+          required: true
+          schema:
+            type: integer
+      summary: Method create Message in Thread
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+              example:
+                participants: 'Hello World'
+      responses:
+        '201':
+          description: Message was create
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/NotAuthorised'
+        '404':
+            description: Thread not found
+  /api/v1/chat/thread/{pk}/messages{pk_message}:
+    put:
+      tags:
+        - Message
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - in: path
+          name: pk
+          description: Thread ID
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: pk_message
+          description: Message ID
+          required: true
+          schema:
+            type: integer
+      summary: Method replace False on True in attr model Message 'is_read'
+      responses:
+        '200':
+          description: Message is read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/NotAuthorised'
+        '404':
+            description: Message or Thread not found
+  /api/v1/chat/thread/{pk}/messages/all:
+    get:
+      tags:
+        - Message
+      summary: List message for user(optionaly for unread message)
+      description:
+        List all message(optionaly unread all message) that the specified user is participating in.
+      parameters:
+        - in: path
+          name: pk
+          description: Thread ID
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: page
+          description: Page number (1-based)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: page_size
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+        - in: query
+          name: unread
+          description: Return list with unread message for user
+          required: false
+          schema:
+            type: string
+            example:
+              'True'
+      responses:
+        '200':
+          description: List of Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type: string
+                  previous:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+        '400':
+            description: Bad request
+        '401':
+            $ref: '#/components/responses/NotAuthorised'
+        '404':
+            description: Thread not found
+  /api/v1/chat/user/login:
+    post:
+      tags:
+        - User
+      summary: Obtain JWT token for authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                password:
+                  type: string
+                  example: p@ssw0rd
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: A JSON Web Token to be used for future authenticated requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access:
+                    type: string
+                    example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDA2MjJ9.ZPeqsL-XYlSWhX9YhHgOWTQjwh2sU6cvhB6nLc6HsJo
+                  refresh:
+                    type: string
+                    example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDA2MjJ9.ZPeqsL-XYlSWhX9YhHgOWTQjwh2sU6cvhB6nLc6HsJo
+        '401':
+          description: Invalid credentials provided
+        '400':
+          description: Missing or malformed request body
+
+  /api/refresh:
+    post:
+      tags:
+        - User
+      summary: Refresh JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh:
+                  type: string
+                  example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDA2MjJ9.ZPeqsL-XYlSWhX9YhHgOWTQjwh2sU6cvhB6nLc6HsJo
+              required:
+                - refresh
+      responses:
+        '200':
+          description: A new JSON Web Token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access:
+                    type: string
+                    example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDA2MjJ9.ZPeqsL-XYlSWhX9YhHgOWTQjwh2sU6cvhB6nLc6HsJo
+        '400':
+          description: Missing or malformed request body or refresh token
+        '401':
+          description: Invalid refresh token provided
+
+components:
+  schemas:
+    Thread:
+      allOf:
+      - type: object
+        properties:
+          id:
+            type: integer
+          created:
+            type: string
+          updated:
+            type: integer
+          participants:
+            type: array
+            items:
+              type: integer
+    Message:
+      allOf:
+      - type: object
+        properties:
+          id:
+            type: integer
+          text:
+            type: string
+          created:
+            type: string
+          is_read:
+            type: boolean
+          sender:
+            type: integer
+          thread:
+            type: integer
+
+  parameters:
+    Authorization:
+      name: Authorization
+      example: Bearer token
+      in: header
+      schema:
+        type: string
+      required: true
+  responses:
+    NotAuthorised:
+      description: Request not authorised
+      content:
+        application/json:
+          schema:
+            properties:
+              message:
+                type: string
+            example:
+              msg: Missing Authorization Header

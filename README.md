@@ -61,3 +61,8 @@ DEBUG - it's boolean variable, for debugging project.
 2. Navigate to the root directory of the project.
 3. Run the Django development server by running the following command:
    **_python manage.py runserver_**
+
+## Documentation Endpoint
+1. Navigate to the root directory of the project.
+2. Open folder "doc"
+3. Use documentation for endpoint from file: **_api_doc.yml_**
