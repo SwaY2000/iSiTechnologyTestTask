@@ -39,7 +39,7 @@ class ListOwnerThread(ListAPIView):
 class MessageView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, pk):
+    def post(self, request, pk=None):
         request.data.update({'sender': self.request.user.id,
                              'thread': pk})
         serializer = MessageSerializer(data=request.data)
@@ -47,6 +47,15 @@ class MessageView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk=None, pk_message=None):
+        thread = get_object_or_404(Thread, id=pk, participants__id=self.request.user.id)
+        message = get_object_or_404(Message.objects.exclude(sender__id=self.request.user.id),
+                                    pk=pk_message, thread=thread)
+        message.is_read = True
+        message.save()
+        serializer = MessageSerializer(message)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class MessageInThreadListView(ListAPIView):
