@@ -57,5 +57,5 @@ class MessageInThreadListView(ListAPIView):
 
     def get_queryset(self):
         threads = get_object_or_404(Thread, id=self.kwargs.get('pk', ' '),
-                                    participants=get_object_or_404(get_user_model(), id=self.request.user.id))
+                                    participants__id=self.request.user.id)
         return Message.objects.filter(thread=threads)
