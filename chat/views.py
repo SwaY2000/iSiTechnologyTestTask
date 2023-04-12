@@ -67,4 +67,6 @@ class MessageInThreadListView(ListAPIView):
     def get_queryset(self):
         threads = get_object_or_404(Thread, id=self.kwargs.get('pk', ' '),
                                     participants__id=self.request.user.id)
+        if self.request.query_params.get('unread') == 'True':
+            return Message.objects.exclude(sender_id=self.request.user.id).filter(thread=threads, is_read=False)
         return Message.objects.filter(thread=threads)
