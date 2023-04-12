@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.generics import get_object_or_404, ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,6 +11,8 @@ from .serializers import ThreadSerializer, MessageSerializer
 
 
 class ThreadView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         serializer = ThreadSerializer(data=request.data)
         if serializer.is_valid():
@@ -24,6 +27,7 @@ class ThreadView(APIView):
 
 
 class ListOwnerThread(ListAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Thread.objects.all()
     serializer_class = ThreadSerializer
     pagination_class = CustomThreadOwnerList
@@ -33,8 +37,10 @@ class ListOwnerThread(ListAPIView):
 
 
 class MessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, pk):
-        request.data.update({'sender': 1,
+        request.data.update({'sender': self.request.user.id,
                              'thread': pk})
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
@@ -44,11 +50,12 @@ class MessageView(APIView):
 
 
 class MessageInThreadListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = MessageSerializer
     queryset = Thread.objects.all()
     pagination_class = CustomThreadOwnerList
 
     def get_queryset(self):
         threads = get_object_or_404(Thread, id=self.kwargs.get('pk', ' '),
-                                    participants=get_object_or_404(get_user_model(), id=1))
+                                    participants=get_object_or_404(get_user_model(), id=self.request.user.id))
         return Message.objects.filter(thread=threads)
