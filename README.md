@@ -20,8 +20,10 @@ Thread can’t have more than 2 participants.
 7. Give access to the project in the GIT repository. (Public Access)
 
 ## Requirements
-- Djangо, DRF
-- authentication Simple JWT or Django Token;
+- Djangо
+- Django Rest Framework
+- python-dotenv
+- Simple JWT
 - database – SQLite
 
 ## .gitignore
